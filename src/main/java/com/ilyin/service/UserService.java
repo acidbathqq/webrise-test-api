@@ -25,11 +25,14 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
-    public User getUserByName(String name) {
-        return userRepository.findByName(name);
+    public Boolean existsById(Long id) {
+        return userRepository.existsById(id);
     }
 
-    public User saveUser(User user) {
+    public User updateUser(User user) {
+        if (user.getId() == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
         return userRepository.save(user);
     }
 

@@ -21,9 +21,9 @@ public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
 
-    public record UserDTO(String name, List<Subscription> subscriptions) {
+    public record UserDTO(Long id, String name, List<Subscription> subscriptions) {
         public static UserDTO from(User user) {
-            return new UserDTO(user.getName(), user.getSubscriptions());
+            return new UserDTO(user.getId(), user.getName(), user.getSubscriptions());
         }
     }
 
@@ -46,6 +46,25 @@ public class UserController {
         user.setSubscriptions(userDTO.subscriptions);
 
         return UserDTO.from(userService.createUser(user));
+    }
+
+    @PutMapping("/{id}")
+    public UserDTO updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
+        User user = userService.getUserById(id);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        user.setName(userDTO.name);
+
+        return UserDTO.from(userService.updateUser(user));
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable Long id) {
+        if (!userService.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        userService.deleteUser(id);
     }
 
 }
