@@ -1,6 +1,7 @@
 package com.ilyin.service;
 
 import com.ilyin.domain.User;
+import com.ilyin.exception.NotFoundException;
 import com.ilyin.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,8 @@ public class UserService {
     }
 
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(User.class, id));
     }
 
     public Boolean existsById(Long id) {
