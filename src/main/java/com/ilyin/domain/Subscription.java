@@ -7,11 +7,7 @@ import jakarta.persistence.*;
 @Table(name = "subscriptions",
         uniqueConstraints = @UniqueConstraint(columnNames = {"user_fk", "service_name"})
 )
-public class Subscription {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Subscription extends AbstractEntity {
 
     @Column(name = "service_name", nullable = false)
     private String serviceName;
@@ -24,14 +20,6 @@ public class Subscription {
         this.id = id;
         this.serviceName = serviceName;
         this.user = user;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getServiceName() {
