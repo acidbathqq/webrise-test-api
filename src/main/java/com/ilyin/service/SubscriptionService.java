@@ -3,12 +3,14 @@ package com.ilyin.service;
 import com.ilyin.domain.Subscription;
 import com.ilyin.domain.User;
 import com.ilyin.domain.dto.Response;
+import com.ilyin.exception.ExceptionUtils;
 import com.ilyin.exception.NotFoundException;
 import com.ilyin.repository.SubscriptionRepository;
 import com.ilyin.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SubscriptionService {
@@ -32,13 +34,20 @@ public class SubscriptionService {
         return subscriptionRepository.save(subscription);
     }
 
-    public void deleteSubscription(Long subId) {
+    public void deleteSubscription(Long subId, Long userId) {
+        Subscription sub = subscriptionRepository.findById(subId)
+                .orElseThrow(() -> new NotFoundException(Subscription.class, subId));
+
+        if (Optional.ofNullable(sub.getUser()).stream().anyMatch(u -> !u.getId().equals(userId))) {
+            ExceptionUtils.logAndThrow(new IllegalArgumentException("Unable to delete subscription for another user"));
+        }
+
         subscriptionRepository.deleteById(subId);
     }
 
     public List<Response.TopSubscriptionResponseDTO> getTopSubscriptions(int limit) {
-        var top = subscriptionRepository.getTopSubscriptions(limit);
-        return top.stream()
+        var topList = subscriptionRepository.getTopSubscriptions(limit);
+        return topList.stream()
                 .map(r -> {
                     String serviceName = (String) r[0];
                     Long userCount = (Long) r[1];

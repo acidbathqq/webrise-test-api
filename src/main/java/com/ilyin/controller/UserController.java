@@ -2,19 +2,16 @@ package com.ilyin.controller;
 
 import com.ilyin.domain.User;
 import com.ilyin.domain.dto.UserDTO;
+import com.ilyin.exception.ExceptionUtils;
 import com.ilyin.exception.NotFoundException;
 import com.ilyin.service.UserService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Optional;
 
-//TODO exception handler
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -29,9 +26,12 @@ public class UserController {
 
     @GetMapping("/{id}")
     public UserDTO getUserById(@PathVariable Long id) {
-        return userService.getUserById(id)
-                .map(u -> new UserDTO().fromEntity(u))
-                .orElseThrow(() -> new NotFoundException(User.class, id));
+        var user = userService.getUserById(id);
+        if (user.isEmpty()) {
+            ExceptionUtils.logAndThrow(new NotFoundException(User.class, id));
+        }
+
+        return new UserDTO().fromEntity(user.get());
     }
 
     @PostMapping
@@ -57,7 +57,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
         if (!userService.existsById(id)) {
-            throw new NotFoundException(User.class, id);
+            ExceptionUtils.logAndThrow(new NotFoundException(User.class, id));
         }
         userService.deleteUser(id);
     }

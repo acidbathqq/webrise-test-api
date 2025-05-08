@@ -5,6 +5,7 @@ import com.ilyin.domain.Subscription;
 import com.ilyin.domain.User;
 import com.ilyin.domain.dto.Response;
 import com.ilyin.domain.dto.SubscriptionDTO;
+import com.ilyin.exception.ExceptionUtils;
 import com.ilyin.exception.NotFoundException;
 import com.ilyin.service.SubscriptionService;
 import com.ilyin.service.UserService;
@@ -37,7 +38,7 @@ public class SubscriptionController {
     @GetMapping()
     public List<SubscriptionDTO> getSubscriptionsByUserId(@PathVariable Long userId) {
         if (!userService.existsById(userId)) {
-            throw new NotFoundException(User.class, userId);
+            ExceptionUtils.logAndThrow(new NotFoundException(User.class, userId));
         }
 
         List<Subscription> subscriptions = userService.getSubscriptionsByUserId(userId);
@@ -47,14 +48,14 @@ public class SubscriptionController {
     @DeleteMapping("/{subId}")
     public void deleteSubscription(@PathVariable Long userId, @PathVariable Long subId) {
         if (!userService.existsById(userId)) {
-            throw new NotFoundException(User.class, userId);
+            ExceptionUtils.logAndThrow(new NotFoundException(User.class, userId));
         }
 
         if (!subscriptionService.existsById(subId)) {
-            throw new NotFoundException(Subscription.class, subId);
+            ExceptionUtils.logAndThrow(new NotFoundException(Subscription.class, subId));
         }
 
-        subscriptionService.deleteSubscription(subId);
+        subscriptionService.deleteSubscription(subId, userId);
     }
 
     @GetMapping("/top")
