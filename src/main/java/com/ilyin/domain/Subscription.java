@@ -16,6 +16,8 @@ public class Subscription extends AbstractEntity {
     @JoinColumn(name = "user_fk", nullable = false)
     private User user;
 
+    public Subscription() {}
+
     public Subscription(Long id, String serviceName, User user) {
         this.id = id;
         this.serviceName = serviceName;

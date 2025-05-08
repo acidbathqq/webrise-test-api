@@ -2,6 +2,7 @@ package com.ilyin.controller;
 
 import com.ilyin.domain.User;
 import com.ilyin.domain.dto.UserDTO;
+import com.ilyin.exception.NotFoundException;
 import com.ilyin.service.UserService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -28,35 +29,35 @@ public class UserController {
 
     @GetMapping("/{id}")
     public UserDTO getUserById(@PathVariable Long id) {
-        return Optional.ofNullable(userService.getUserById(id))
-                .map(UserDTO::from)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return userService.getUserById(id)
+                .map(u -> new UserDTO().fromEntity(u))
+                .orElseThrow(() -> new NotFoundException(User.class, id));
     }
 
     @PostMapping
     public UserDTO createUser(@RequestBody @Valid UserDTO userDTO) {
-        User user = new User();
-        user.setName(userDTO.getName());
-        user.setSubscriptions(userDTO.getSubscriptions());
+        User user = userDTO.toEntity();
 
-        return UserDTO.from(userService.createUser(user));
+        return new UserDTO().fromEntity(
+                userService.createUser(user)
+        );
     }
 
     @PutMapping("/{id}")
     public UserDTO updateUser(@PathVariable Long id, @RequestBody @Valid UserDTO userDTO) {
-        User user = userService.getUserById(id);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        user.setName(userDTO.getName());
+        User user = userService.getUserById(id)
+                .orElseThrow(() -> new NotFoundException(User.class, id));
 
-        return UserDTO.from(userService.updateUser(user));
+        user.setName(userDTO.getName());
+        return new UserDTO().fromEntity(
+                userService.updateUser(user)
+        );
     }
 
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
         if (!userService.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new NotFoundException(User.class, id);
         }
         userService.deleteUser(id);
     }

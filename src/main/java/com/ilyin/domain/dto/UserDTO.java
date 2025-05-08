@@ -1,15 +1,15 @@
 package com.ilyin.domain.dto;
 
 
-import com.ilyin.controller.UserController;
 import com.ilyin.domain.Subscription;
 import com.ilyin.domain.User;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class UserDTO {
+public class UserDTO implements DtoMapper<User, UserDTO> {
 
     private Long id;
 
@@ -17,14 +17,32 @@ public class UserDTO {
     @Size(min = 2, message = "Name must be at least 2 characters long")
     private String name;
 
-    private List<Subscription> subscriptions;
+    private List<SubscriptionDTO> subscriptions;
 
-    public UserDTO(Long id, String name, List<Subscription> subscriptions) {
 
+    @Override
+    public UserDTO fromEntity(User user) {
+        this.id = user.getId();
+        this.name = user.getName();
+        this.subscriptions = new SubscriptionDTO().fromEntityList(user.getSubscriptions());
+        return this;
     }
 
-    public static UserDTO from(User user) {
-        return new UserDTO(user.getId(), user.getName(), user.getSubscriptions());
+    @Override
+    public User toEntity() {
+        User user = new User();
+        user.setId(this.getId());
+        user.setName(this.getName());
+        if (subscriptions != null) {
+            var subs = subscriptions.stream()
+                    .map(subscriptionDTO -> {
+                        var sub = subscriptionDTO.toEntity();
+                        sub.setUser(user);
+                        return sub;
+                    }).collect(Collectors.toList());
+            user.setSubscriptions(subs);
+        }
+        return user;
     }
 
     public Long getId() {
@@ -43,11 +61,11 @@ public class UserDTO {
         this.name = name;
     }
 
-    public List<Subscription> getSubscriptions() {
+    public List<SubscriptionDTO> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(List<Subscription> subscriptions) {
+    public void setSubscriptions(List<SubscriptionDTO> subscriptions) {
         this.subscriptions = subscriptions;
     }
 }
