@@ -1,4 +1,4 @@
-FROM azul/zulu-openjdk:17 as builder
+FROM eclipse-temurin:17 as builder
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY src ./src
 
 RUN ./gradlew bootJar --no-daemon
 
-FROM azul/zulu-openjdk:17-jre
+FROM eclipse-temurin:17
 
 WORKDIR /app
 

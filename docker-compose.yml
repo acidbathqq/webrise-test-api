@@ -17,7 +17,7 @@ services:
 
   subscription-app:
     build:
-      context: ..
+      context: .
       dockerfile: docker/Dockerfile
     container_name: subscription-service
     ports:

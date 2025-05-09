@@ -16,7 +16,7 @@ public class SubscriptionServiceApplication {
             log.info("=========== SubscriptionService successfully started. ===========");
         } catch (Exception e) {
             log.error("=========== Error starting SubscriptionService application! ===========", e);
-            throw e; // выбрасывание исключения, чтобы приложение завершилось с ошибкой
+            throw e;
         }
     }
 }
